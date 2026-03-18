@@ -18,6 +18,11 @@
                     <x-nav-link :href="route('records.index')" :active="request()->routeIs('records.*')">
                         {{ __('Records') }}
                     </x-nav-link>
+                    @if(Auth::user()->isAdmin())
+                    <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
+                        <span class="text-red-600">{{ __('Admin') }}</span>
+                    </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -76,6 +81,11 @@
             <x-responsive-nav-link :href="route('records.index')" :active="request()->routeIs('records.*')">
                 {{ __('Records') }}
             </x-responsive-nav-link>
+            @if(Auth::user()->isAdmin())
+            <x-responsive-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
+                {{ __('Admin') }}
+            </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->

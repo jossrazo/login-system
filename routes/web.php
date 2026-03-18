@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RecordController;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,12 @@ Route::middleware('auth')->group(function () {
 
     // Records CRUD
     Route::resource('records', RecordController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+
+    // Admin-only routes — protected by AdminMiddleware
+    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/',                         [AdminController::class, 'index'])->name('index');
+        Route::post('/users/{user}/toggle-role',[AdminController::class, 'toggleRole'])->name('toggle-role');
+    });
 });
 
 require __DIR__.'/auth.php';
