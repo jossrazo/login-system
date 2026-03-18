@@ -47,6 +47,25 @@ Alpine.js validates forms before submission:
 
 ---
 
+## Screenshots
+
+### Login
+![Login](docs/screenshots/login.png)
+
+### Register
+![Register](docs/screenshots/register.png)
+
+### Records Page
+![Records](docs/screenshots/recordspage.png)
+
+### Add Record
+![Add Record](docs/screenshots/addrecords.png)
+
+### Admin Dashboard
+![Admin Dashboard](docs/screenshots/admindashboard.png)
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
