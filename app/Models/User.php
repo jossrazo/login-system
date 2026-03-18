@@ -10,6 +10,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * Represents a registered user in the system.
+ *
+ * Key security attributes:
+ * - password: stored as a bcrypt hash (never plain text). Marked as 'hashed'
+ *   in casts so Laravel automatically hashes it when assigning.
+ * - remember_token: excluded from JSON/array output via the #[Hidden] attribute.
+ * - role: either 'user' (default) or 'admin'. Controls access to the admin panel.
+ *
+ * The #[Fillable] attribute whitelists which columns can be mass-assigned,
+ * preventing mass-assignment vulnerabilities on unintended columns.
+ */
 #[Fillable(['name', 'email', 'password', 'role'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -18,7 +30,10 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * Get the attributes that should be cast.
+     * Attribute casts:
+     * - email_verified_at: cast to Carbon datetime for easy comparison.
+     * - password: cast as 'hashed' so Laravel automatically runs
+     *   password_hash() (bcrypt) whenever the password attribute is set.
      *
      * @return array<string, string>
      */
@@ -26,12 +41,16 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
     }
 
     /**
-     * Convenience helper — avoids sprinkling role string literals everywhere.
+     * Check whether this user has the admin role.
+     *
+     * Usage: $user->isAdmin()
+     * Used in Blade views (@if(Auth::user()->isAdmin())) and
+     * in AdminController to guard role-toggle actions.
      */
     public function isAdmin(): bool
     {
