@@ -1,58 +1,161 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Login System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A secure PHP 8 login and registration system with a full CRUD dashboard, built with **Laravel 13**, **Tailwind CSS**, and **Svelte 5**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Authentication
+- User registration and login using **session-based authentication** (Laravel Breeze)
+- Secure password hashing via `password_hash()` (bcrypt through Laravel's `Hash::make()`)
+- Password verification via `password_verify()` (Laravel's `Hash::check()`)
+- Session encryption, HttpOnly cookies, and SameSite=Lax protection
+- Logout with full session invalidation
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### CRUD Dashboard
+- **Create** new user profile records
+- **Read** and display records in a searchable table
+- **Update** existing records with pre-filled forms
+- **Delete** records with a **Svelte-powered confirmation modal**
 
-## Learning Laravel
+### Security
+| Measure | Implementation |
+|---|---|
+| SQL Injection | PDO prepared statements with named parameters (`getPdo()` + `prepare()`) |
+| XSS | Blade `{{ }}` auto-escaping + `e()` helper on raw PDO results |
+| CSRF | Laravel's built-in `@csrf` token on every form |
+| Session | Encrypted sessions stored in DB, HttpOnly + SameSite cookies |
+| Authorization | All CRUD routes gated by `auth` middleware; ownership checked on every query |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Client-Side Validation
+Alpine.js validates forms before submission:
+- Required field checks (First Name, Last Name, Email)
+- Email format regex check
+- Phone number format check
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Role-Based Access Control (Bonus)
+- Two roles: `user` (default) and `admin`
+- Admin panel at `/admin` — view all users and all records across the system
+- Admins can promote/demote other users
+- Protected by `AdminMiddleware`
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### Error Handling
+- All PDO operations wrapped in `try/catch (\PDOException)`
+- Errors logged server-side via `Log::error()` — no stack traces exposed to users
+- User-friendly flash messages for success, error, and validation failures
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Tech Stack
 
+| Layer | Technology |
+|---|---|
+| Backend | PHP 8.4, Laravel 13 |
+| Frontend | Tailwind CSS 3, Alpine.js 3, Svelte 5 |
+| Database | MySQL 8 |
+| Build Tool | Vite 7 |
+| Auth Scaffold | Laravel Breeze (Blade stack) |
+
+---
+
+## Setup Instructions
+
+### Prerequisites
+- PHP 8.2+ with extensions: `pdo`, `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `zip`, `curl`
+- Composer
+- Node.js 18+ and npm
+- MySQL 8+
+
+### 1. Clone the repository
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/jossrazo/login-system.git
+cd login-system
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Install dependencies
+```bash
+composer install
+npm install
+```
 
-## Contributing
+### 3. Configure environment
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Edit `.env` with your database credentials:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
 
-## Code of Conduct
+### 4. Import the database schema
+**Option A — Laravel migrations (recommended):**
+```bash
+php artisan migrate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**Option B — SQL file:**
+```bash
+mysql -u your_username -p your_database < schema.sql
+```
 
-## Security Vulnerabilities
+### 5. Run the application
+```bash
+# Terminal 1 — PHP backend
+php artisan serve
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Terminal 2 — Vite frontend
+npm run dev
+```
 
-## License
+Open **http://127.0.0.1:8000** in your browser.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 6. Create an admin user (optional)
+After registering a user, promote them to admin via MySQL:
+```sql
+UPDATE users SET role = 'admin' WHERE email = 'your@email.com';
+```
+Then navigate to `/admin` after logging in.
+
+---
+
+## Project Structure
+
+```
+app/
+  Http/
+    Controllers/
+      AdminController.php      ← Admin panel (RBAC, view all records/users)
+      RecordController.php     ← CRUD with explicit PDO prepared statements
+      ProfileController.php    ← User profile management (Breeze)
+    Middleware/
+      AdminMiddleware.php      ← Restricts /admin routes to role='admin'
+  Models/
+    User.php                   ← role field, isAdmin() helper
+    Record.php                 ← Profile record model
+
+resources/
+  js/
+    app.js                     ← Svelte 5 component mounting logic
+    components/
+      DeleteConfirm.svelte     ← Animated delete confirmation modal
+  views/
+    admin/index.blade.php      ← Admin panel view
+    records/
+      index.blade.php          ← CRUD table with search
+      create.blade.php         ← Create form with Alpine.js validation
+      edit.blade.php           ← Edit form with Alpine.js validation
+
+database/
+  migrations/                  ← All table definitions
+schema.sql                     ← Exported SQL schema for reference
+```
+
+
