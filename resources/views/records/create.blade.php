@@ -15,43 +15,93 @@
     <div class="py-10">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-sm sm:rounded-lg p-6 sm:p-8">
-                <form method="POST" action="{{ route('records.store') }}" novalidate>
+
+                {{-- Alpine.js handles client-side validation before the form submits --}}
+                <form method="POST" action="{{ route('records.store') }}"
+                      x-data="{
+                          fields: {
+                              first_name: '{{ old('first_name') }}',
+                              last_name:  '{{ old('last_name') }}',
+                              email:      '{{ old('email') }}',
+                              phone:      '{{ old('phone') }}',
+                              department: '{{ old('department') }}',
+                              notes:      '{{ old('notes') }}'
+                          },
+                          errors: {},
+                          validate() {
+                              this.errors = {};
+                              if (!this.fields.first_name.trim())
+                                  this.errors.first_name = 'First name is required.';
+                              if (!this.fields.last_name.trim())
+                                  this.errors.last_name = 'Last name is required.';
+                              if (!this.fields.email.trim()) {
+                                  this.errors.email = 'Email is required.';
+                              } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.fields.email)) {
+                                  this.errors.email = 'Please enter a valid email address.';
+                              }
+                              if (this.fields.phone && !/^[\d\s\+\-\(\)]{7,20}$/.test(this.fields.phone))
+                                  this.errors.phone = 'Please enter a valid phone number.';
+                              return Object.keys(this.errors).length === 0;
+                          },
+                          submit(e) {
+                              if (!this.validate()) e.preventDefault();
+                          }
+                      }"
+                      @submit="submit($event)"
+                      novalidate>
                     @csrf
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
                         {{-- First Name --}}
                         <div>
-                            <x-input-label for="first_name" :value="__('First Name')" />
+                            <x-input-label for="first_name" :value="__('First Name *')" />
                             <x-text-input id="first_name" name="first_name" type="text"
-                                class="mt-1 block w-full" :value="old('first_name')"
-                                required autofocus autocomplete="given-name" />
+                                class="mt-1 block w-full"
+                                x-model="fields.first_name"
+                                :value="old('first_name')"
+                                autocomplete="given-name" />
+                            <p x-show="errors.first_name" x-text="errors.first_name"
+                               class="mt-1 text-sm text-red-600" x-cloak></p>
                             <x-input-error :messages="$errors->get('first_name')" class="mt-2" />
                         </div>
 
                         {{-- Last Name --}}
                         <div>
-                            <x-input-label for="last_name" :value="__('Last Name')" />
+                            <x-input-label for="last_name" :value="__('Last Name *')" />
                             <x-text-input id="last_name" name="last_name" type="text"
-                                class="mt-1 block w-full" :value="old('last_name')"
-                                required autocomplete="family-name" />
+                                class="mt-1 block w-full"
+                                x-model="fields.last_name"
+                                :value="old('last_name')"
+                                autocomplete="family-name" />
+                            <p x-show="errors.last_name" x-text="errors.last_name"
+                               class="mt-1 text-sm text-red-600" x-cloak></p>
                             <x-input-error :messages="$errors->get('last_name')" class="mt-2" />
                         </div>
 
                         {{-- Email --}}
                         <div class="sm:col-span-2">
-                            <x-input-label for="email" :value="__('Email')" />
+                            <x-input-label for="email" :value="__('Email *')" />
                             <x-text-input id="email" name="email" type="email"
-                                class="mt-1 block w-full" :value="old('email')"
-                                required autocomplete="email" />
+                                class="mt-1 block w-full"
+                                x-model="fields.email"
+                                :value="old('email')"
+                                autocomplete="email" />
+                            <p x-show="errors.email" x-text="errors.email"
+                               class="mt-1 text-sm text-red-600" x-cloak></p>
                             <x-input-error :messages="$errors->get('email')" class="mt-2" />
                         </div>
 
                         {{-- Phone --}}
                         <div>
                             <x-input-label for="phone" :value="__('Phone')" />
-                            <x-text-input id="phone" name="phone" type="text"
-                                class="mt-1 block w-full" :value="old('phone')"
+                            <x-text-input id="phone" name="phone" type="tel"
+                                class="mt-1 block w-full"
+                                x-model="fields.phone"
+                                :value="old('phone')"
                                 autocomplete="tel" />
+                            <p x-show="errors.phone" x-text="errors.phone"
+                               class="mt-1 text-sm text-red-600" x-cloak></p>
                             <x-input-error :messages="$errors->get('phone')" class="mt-2" />
                         </div>
 
@@ -59,7 +109,9 @@
                         <div>
                             <x-input-label for="department" :value="__('Department')" />
                             <x-text-input id="department" name="department" type="text"
-                                class="mt-1 block w-full" :value="old('department')" />
+                                class="mt-1 block w-full"
+                                x-model="fields.department"
+                                :value="old('department')" />
                             <x-input-error :messages="$errors->get('department')" class="mt-2" />
                         </div>
 
@@ -67,6 +119,7 @@
                         <div class="sm:col-span-2">
                             <x-input-label for="notes" :value="__('Notes')" />
                             <textarea id="notes" name="notes" rows="3"
+                                x-model="fields.notes"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                             >{{ old('notes') }}</textarea>
                             <x-input-error :messages="$errors->get('notes')" class="mt-2" />
